@@ -94,13 +94,27 @@ if in_money == out_money:
     print("MOEDAS IGUAIS! TENTE NOVAMENTE ESCOLHENDO OUTRAS OPÇÕES")
     sys.exit()
     
-
-
-count = float(input("Digite o quanto você quer converter: "))
-
-request = requests.get(f'https://economia.awesomeapi.com.br/json/last/{puller}')
-dados = request.json()
-
+while True:
+    try:
+        count = float(input("Digite o quanto você quer converter: "))
+        break
+    except ValueError:
+        print("Valor inválido! Tente novamente")
+try:
+    request_online = requests.get(f'https://economia.awesomeapi.com.br/json/last/{puller}')
+except requests.exceptions.ConnectionError:
+    print("Erro: Sem conexão com a internet. Verifique sua rede.")
+    sys.exit()
+except requests.exceptions.Timeout:
+    print("Erro: A requisição demorou muito para responder (Timeout).")
+    sys.exit()
+except requests.exceptions.HTTPError as err:
+    print(f"Erro HTTP: {err}")
+    sys.exit()
+except requests.exceptions.RequestException as e:
+    print(f"Ocorreu um erro inesperado de rede: {e}")
+    sys.exit()
+dados = request_online.json()
 chave = puller.replace("-", "")
 valor_moeda = float(dados[chave]["bid"])
 valor_moeda_final = count * valor_moeda
